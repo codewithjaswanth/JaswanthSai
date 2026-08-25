@@ -200,9 +200,26 @@ a {
 #custom-cursor.has-text {
   width: 80px !important;
   height: 80px !important;
+  border-radius: 50% !important;
   background-color: rgba(139, 92, 246, 0.15) !important;
   border-color: var(--accent-purple) !important; /* Royal Violet line */
   backdrop-filter: blur(6px) !important;
+}
+
+#custom-cursor.has-icon {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  background-color: rgba(0, 216, 255, 0.18) !important;
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 25px rgba(0, 216, 255, 0.5), inset 0 0 12px rgba(0, 216, 255, 0.25) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.light-theme #custom-cursor.has-icon {
+  background-color: rgba(2, 132, 199, 0.18) !important;
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 20px rgba(2, 132, 199, 0.4), inset 0 0 8px rgba(2, 132, 199, 0.2) !important;
 }
 
 #cursor-text-container {
@@ -228,6 +245,22 @@ a {
   text-shadow: 0 0 10px rgba(0, 216, 255, 0.8), 0 0 20px rgba(0, 216, 255, 0.4);
   transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
   transform: scale(0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#cursor-text i {
+  font-size: 19px;
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 0 8px rgba(0, 216, 255, 0.9));
+  display: inline-block;
+  line-height: 1;
+}
+
+.light-theme #cursor-text i {
+  color: var(--accent-cyan);
+  filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.7));
 }
 
 #cursor-text-container.show-text #cursor-text {
@@ -366,8 +399,11 @@ a {
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.65;
+  filter: blur(80px);
+  opacity: 0.6;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   transition: background-color 0.5s ease;
 }
 
@@ -393,32 +429,32 @@ a {
 }
 
 @keyframes float-blob-1 {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(120px, 80px) scale(1.15); }
-  66% { transform: translate(-80px, 160px) scale(0.9); }
-  100% { transform: translate(40px, -40px) scale(1.05); }
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(120px, 80px, 0) scale(1.15); }
+  66% { transform: translate3d(-80px, 160px, 0) scale(0.9); }
+  100% { transform: translate3d(40px, -40px, 0) scale(1.05); }
 }
 
 @keyframes float-blob-2 {
-  0% { transform: translate(0, 0) scale(1.1); }
-  33% { transform: translate(-100px, -120px) scale(0.85); }
-  66% { transform: translate(80px, -40px) scale(1.1); }
-  100% { transform: translate(-40px, 100px) scale(1); }
+  0% { transform: translate3d(0, 0, 0) scale(1.1); }
+  33% { transform: translate3d(-100px, -120px, 0) scale(0.85); }
+  66% { transform: translate3d(80px, -40px, 0) scale(1.1); }
+  100% { transform: translate3d(-40px, 100px, 0) scale(1); }
 }
 
 @keyframes float-blob-3 {
-  0% { transform: translate(0, 0) scale(0.9); }
-  50% { transform: translate(140px, -100px) scale(1.2); }
-  100% { transform: translate(-100px, 120px) scale(0.85); }
+  0% { transform: translate3d(0, 0, 0) scale(0.9); }
+  50% { transform: translate3d(140px, -100px, 0) scale(1.2); }
+  100% { transform: translate3d(-100px, 120px, 0) scale(0.85); }
 }
 
 /* Optimize on mobile: disable blur filter, use simpler gradients or disable floating blobs for performance */
 @media (max-width: 768px) {
   .bg-blob {
-    width: 300px;
-    height: 300px;
-    filter: blur(80px);
-    opacity: 0.45;
+    width: 280px;
+    height: 280px;
+    filter: blur(60px);
+    opacity: 0.4;
   }
 }
 
@@ -427,8 +463,8 @@ a {
    ========================================== */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--glass-border);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-left: 1px solid rgba(255, 255, 255, 0.1);
@@ -488,9 +524,9 @@ a {
   left: 200%;
 }
 
-/* Make inner content physically pop out in 3D when the card tilts */
+/* Make inner content physically pop out in 3D when the card tilts (subtle depth) */
 .glass-panel > * {
-  transform: translateZ(30px);
+  transform: translateZ(8px);
   transition: transform 0.3s ease;
 }
 
@@ -501,7 +537,7 @@ a {
 /* ==========================================
    NEON MATTER HOVER EFFECTS
    ========================================== */
-p, h1, h2, h3, h4, h5, h6, span {
+.section-title, .hero-name, h1, h2, h3, .project-card, .timeline-item {
   transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
@@ -2226,3 +2262,612 @@ footer {
     height: 60px;
   }
 }
+
+/* ==========================================
+   CCBP LEARNING STREAK BOARD
+   ========================================== */
+.streak-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 1. Metrics Grid */
+.streak-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+  gap: 22px;
+  width: 100%;
+}
+
+.streak-metric-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 26px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.45) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
+              border-color 0.3s ease, 
+              box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.light-theme .streak-metric-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.75) 100%);
+  border: 1px solid rgba(2, 132, 199, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 1);
+  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.streak-metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.streak-metric-card.card-fire::before { background: linear-gradient(90deg, transparent, #f97316, transparent); }
+.streak-metric-card.card-trophy::before { background: linear-gradient(90deg, transparent, #eab308, transparent); }
+.streak-metric-card.card-calendar::before { background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent); }
+.streak-metric-card.card-status::before { background: linear-gradient(90deg, transparent, #10b981, transparent); }
+
+.streak-metric-card:hover::before {
+  opacity: 1;
+}
+
+.streak-metric-card.card-fire:hover {
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(249, 115, 22, 0.2);
+}
+
+.streak-metric-card.card-trophy:hover {
+  border-color: rgba(234, 179, 8, 0.45);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(234, 179, 8, 0.2);
+}
+
+.streak-metric-card.card-calendar:hover {
+  border-color: rgba(0, 216, 255, 0.45);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 216, 255, 0.2);
+}
+
+.streak-metric-card.card-status:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.2);
+}
+
+.metric-icon-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  background: #000000;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.metric-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  filter: contrast(1.1) brightness(1.05);
+}
+
+.streak-metric-card:hover .metric-icon-box {
+  transform: scale(1.08) rotate(4deg);
+}
+
+.streak-metric-card:hover .metric-icon-img {
+  transform: scale(1.1);
+  filter: contrast(1.15) brightness(1.2);
+}
+
+.fire-glow {
+  background: #050201;
+  border: 1.5px solid rgba(249, 115, 22, 0.6);
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.3), inset 0 0 15px rgba(249, 115, 22, 0.2);
+}
+
+.trophy-glow {
+  background: #050400;
+  border: 1.5px solid rgba(234, 179, 8, 0.6);
+  box-shadow: 0 0 25px rgba(234, 179, 8, 0.3), inset 0 0 15px rgba(234, 179, 8, 0.2);
+}
+
+.calendar-glow {
+  background: #000408;
+  border: 1.5px solid rgba(0, 216, 255, 0.6);
+  box-shadow: 0 0 25px rgba(0, 216, 255, 0.3), inset 0 0 15px rgba(0, 216, 255, 0.2);
+}
+
+.status-glow {
+  background: #020604;
+  border: 1.5px solid rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.3), inset 0 0 15px rgba(16, 185, 129, 0.2);
+}
+
+.status-glow.active-today {
+  background: #010603;
+  border-color: rgba(16, 185, 129, 0.8);
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.45), inset 0 0 15px rgba(16, 185, 129, 0.3);
+}
+
+.status-glow.pending-today {
+  background: #010605;
+  border-color: rgba(20, 184, 166, 0.8);
+  box-shadow: 0 0 28px rgba(20, 184, 166, 0.4), inset 0 0 15px rgba(20, 184, 166, 0.25);
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.metric-label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.metric-value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 3px 0 2px 0;
+}
+
+.metric-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.light-theme .metric-value {
+  color: #0f172a;
+  text-shadow: none;
+}
+
+.metric-unit {
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.metric-subtext {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 3px;
+}
+
+.metric-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
+  width: fit-content;
+}
+
+.metric-status-badge.completed {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3), inset 0 0 8px rgba(16, 185, 129, 0.15);
+}
+
+.metric-status-badge.pending {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.25), inset 0 0 8px rgba(245, 158, 11, 0.15);
+}
+
+/* 2. Heatmap Main Card */
+.streak-heatmap-card {
+  padding: 28px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+
+.heatmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.light-theme .heatmap-header {
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+.heatmap-header-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.heatmap-title-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 216, 255, 0.15), rgba(139, 92, 246, 0.2));
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 0 15px rgba(0, 216, 255, 0.2);
+}
+
+.heatmap-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.heatmap-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.heatmap-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 8px #10b981;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.7;
+    box-shadow: 0 0 16px #10b981;
+  }
+}
+
+/* 3. Heatmap Scrollable Wrapper */
+.heatmap-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-cyan) var(--scrollbar-track);
+}
+
+.heatmap-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.heatmap-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--accent-cyan);
+  border-radius: 6px;
+}
+
+.heatmap-board {
+  min-width: 840px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 4px;
+  position: relative;
+}
+
+/* Loading & Empty States */
+.heatmap-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 45px 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.streak-loader-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(0, 216, 255, 0.15);
+  border-top-color: var(--accent-cyan);
+  border-radius: 50%;
+  animation: spinLoader 0.9s linear infinite;
+}
+
+@keyframes spinLoader {
+  to { transform: rotate(360deg); }
+}
+
+/* Heatmap Inner Grid */
+.heatmap-months-row {
+  display: flex;
+  position: relative;
+  height: 18px;
+  margin-left: 36px;
+  margin-bottom: 4px;
+}
+
+.heatmap-month-label {
+  position: absolute;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.heatmap-main-grid {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.heatmap-days-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 114px;
+  width: 28px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  user-select: none;
+  padding-top: 2px;
+}
+
+.heatmap-weeks-container {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.heatmap-week-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heatmap-cell {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease,
+              background-color 0.2s ease,
+              border-color 0.2s ease;
+  position: relative;
+}
+
+.heatmap-cell.level-0 {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light-theme .heatmap-cell.level-0 {
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.heatmap-cell.level-1 {
+  background: linear-gradient(135deg, #00d8ff 0%, #8b5cf6 100%);
+  border: 1px solid #00d8ff;
+  box-shadow: 0 0 8px rgba(0, 216, 255, 0.6);
+}
+
+.light-theme .heatmap-cell.level-1 {
+  background: linear-gradient(135deg, #0284c7 0%, #7c3aed 100%);
+  border: 1px solid #0284c7;
+  box-shadow: 0 0 8px rgba(2, 132, 199, 0.45);
+}
+
+.heatmap-cell.is-today {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 1px;
+}
+
+.heatmap-cell.is-future {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.heatmap-cell:not(.is-future):hover {
+  transform: scale(1.45);
+  z-index: 10;
+  border-color: #ffffff;
+  box-shadow: 0 0 14px var(--accent-cyan);
+}
+
+/* 4. Heatmap Footer & Legend */
+.heatmap-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.light-theme .heatmap-footer {
+  border-top-color: rgba(15, 23, 42, 0.08);
+}
+
+.heatmap-summary-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.legend-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* 5. Tooltip Styling */
+.streak-tooltip {
+  position: fixed;
+  z-index: 1000000;
+  pointer-events: none;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--accent-cyan);
+  padding: 8px 14px;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 216, 255, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -100%) translateY(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  white-space: nowrap;
+}
+
+.light-theme .streak-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.15), 0 0 12px rgba(2, 132, 199, 0.25);
+}
+
+.streak-tooltip.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -100%) translateY(-10px);
+}
+
+.tooltip-header {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  margin-bottom: 2px;
+}
+
+.tooltip-body {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Responsive Rules for Streak Section */
+@media (max-width: 992px) {
+  .streak-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .streak-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  
+  .streak-metric-card {
+    padding: 16px 18px;
+  }
+  
+  .streak-heatmap-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+  
+  .heatmap-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .heatmap-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+

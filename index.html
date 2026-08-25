@@ -56,12 +56,13 @@
 
       <nav class="nav-menu-wrapper">
         <ul class="nav-menu" id="nav-menu">
-          <li><a href="#home" class="nav-link active">Home</a></li>
-          <li><a href="#about" class="nav-link">About</a></li>
-          <li><a href="#skills" class="nav-link">Skills</a></li>
-          <li><a href="#projects" class="nav-link">Projects</a></li>
-          <li><a href="#experience" class="nav-link">Experience</a></li>
-          <li><a href="#contact" class="nav-link">Contact</a></li>
+          <li><a href="#home" class="nav-link active" data-cursor-icon="fa-solid fa-house">Home</a></li>
+          <li><a href="#about" class="nav-link" data-cursor-icon="fa-solid fa-user-astronaut">About</a></li>
+          <li><a href="#skills" class="nav-link" data-cursor-icon="fa-solid fa-code">Skills</a></li>
+          <li><a href="#streak" class="nav-link" data-cursor-icon="fa-solid fa-fire-flame-curved">Streak</a></li>
+          <li><a href="#projects" class="nav-link" data-cursor-icon="fa-solid fa-rocket">Projects</a></li>
+          <li><a href="#experience" class="nav-link" data-cursor-icon="fa-solid fa-graduation-cap">Experience</a></li>
+          <li><a href="#contact" class="nav-link" data-cursor-icon="fa-solid fa-paper-plane">Contact</a></li>
         </ul>
       </nav>
 
@@ -247,6 +248,123 @@
             </div>
 
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CCBP Learning Streak Section -->
+    <section id="streak" class="section-container">
+      <h2 class="section-title"><span>Learning Streak</span></h2>
+      <p class="subtitle">Live CCBP daily learning consistency & contribution tracking.</p>
+
+      <div class="streak-wrapper fade-in-element slide-up">
+        <!-- Metrics Grid -->
+        <div class="streak-metrics-grid">
+          <!-- Metric 1: Current Streak -->
+          <div class="streak-metric-card card-fire glass-panel" data-tilt>
+            <div class="metric-icon-box fire-glow">
+              <img src="assets/icons/neon_fire_flame.jpg" alt="Fire Flame" class="metric-icon-img" />
+            </div>
+            <div class="metric-info">
+              <span class="metric-label">Current Streak</span>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="current-streak-val">--</span>
+                <span class="metric-unit" id="current-streak-unit">Days</span>
+              </div>
+              <span class="metric-subtext" id="current-streak-sub">Tracking consecutive days</span>
+            </div>
+          </div>
+
+          <!-- Metric 2: Longest Streak -->
+          <div class="streak-metric-card card-trophy glass-panel" data-tilt>
+            <div class="metric-icon-box trophy-glow">
+              <img src="assets/icons/neon_trophy.jpg" alt="Trophy" class="metric-icon-img" />
+            </div>
+            <div class="metric-info">
+              <span class="metric-label">Longest Streak</span>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="longest-streak-val">--</span>
+                <span class="metric-unit" id="longest-streak-unit">Days</span>
+              </div>
+              <span class="metric-subtext" id="longest-streak-sub">All-time record</span>
+            </div>
+          </div>
+
+          <!-- Metric 3: Total Active Days -->
+          <div class="streak-metric-card card-calendar glass-panel" data-tilt>
+            <div class="metric-icon-box calendar-glow">
+              <img src="assets/icons/neon_calendar.jpg" alt="Calendar" class="metric-icon-img" />
+            </div>
+            <div class="metric-info">
+              <span class="metric-label">Total Active Days</span>
+              <div class="metric-value-wrap">
+                <span class="metric-value" id="total-days-val">--</span>
+                <span class="metric-unit" id="total-days-unit">Days</span>
+              </div>
+              <span class="metric-subtext" id="total-days-sub">Logged learning sessions</span>
+            </div>
+          </div>
+
+          <!-- Metric 4: Today's Status -->
+          <div class="streak-metric-card card-status glass-panel" data-tilt>
+            <div class="metric-icon-box status-glow" id="today-status-icon-box">
+              <img src="assets/icons/neon_hourglass.jpg" alt="Today Status" class="metric-icon-img" id="today-status-icon-img" />
+            </div>
+            <div class="metric-info">
+              <span class="metric-label">Today's Activity</span>
+              <div class="metric-value-wrap">
+                <span class="metric-status-badge" id="today-status-badge">Checking...</span>
+              </div>
+              <span class="metric-subtext" id="today-status-sub">Supabase live sync</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contribution Heatmap Card -->
+        <div class="streak-heatmap-card glass-panel">
+          <div class="heatmap-header">
+            <div class="heatmap-header-title">
+              <div class="heatmap-title-icon"><i class="fa-solid fa-chart-simple"></i></div>
+              <div>
+                <h3 class="heatmap-title">Activity Heatmap (Past 365 Days)</h3>
+                <p class="heatmap-desc">CCBP daily practice check-ins recorded automatically</p>
+              </div>
+            </div>
+            <div class="heatmap-live-indicator" id="heatmap-live-status">
+              <span class="pulse-dot"></span>
+              <span id="streak-last-sync">Connected to Supabase</span>
+            </div>
+          </div>
+
+          <!-- Scrollable Heatmap Board -->
+          <div class="heatmap-scroll-container" id="heatmap-scroll-wrap">
+            <div class="heatmap-board" id="streak-heatmap-board">
+              <!-- Loading Spinner -->
+              <div class="heatmap-loading-state" id="heatmap-loading">
+                <div class="streak-loader-spinner"></div>
+                <span>Fetching CCBP learning history...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Heatmap Footer & Legend -->
+          <div class="heatmap-footer">
+            <div class="heatmap-summary-text" id="heatmap-range-summary">
+              Showing past 365 days of learning progress
+            </div>
+            <div class="heatmap-legend">
+              <span class="legend-text">Less</span>
+              <div class="legend-box level-0" title="0 check-ins"></div>
+              <div class="legend-box level-1" title="Active CCBP Check-in"></div>
+              <span class="legend-text">More</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Tooltip Element -->
+        <div id="streak-tooltip" class="streak-tooltip" role="tooltip" aria-hidden="true">
+          <div class="tooltip-header" id="tooltip-date"></div>
+          <div class="tooltip-body" id="tooltip-status"></div>
         </div>
       </div>
     </section>

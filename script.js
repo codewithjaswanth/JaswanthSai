@@ -1,1070 +1,1225 @@
 /**
  * JASWANTH SAI - PERSONAL PORTFOLIO WEBSITE JS
  * Liquid Glass & Space Theme
- * Fully responsive, optimized interactive features.
+ * Fully responsive, high-performance optimized interactive features.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  
+
   // ==========================================
   // 1. PRELOADER & PAGE ENTRY
   // ==========================================
   const preloader = document.getElementById('preloader');
-  
-  // Ensure the preloader stays visible for exactly 3 seconds
-  setTimeout(() => {
-    if (preloader) {
+  if (preloader) {
+    setTimeout(() => {
       preloader.style.opacity = '0';
       preloader.style.visibility = 'hidden';
       document.body.style.overflow = 'visible';
-    }
-  }, 3000);
-
+    }, 1800);
+  }
 
   // ==========================================
-  // 2. DUAL CUSTOM CURSOR (lerp-smoothed)
+  // 2. DUAL CUSTOM CURSOR (Hardware-accelerated)
   // ==========================================
   const cursorRing = document.getElementById('custom-cursor');
   const cursorDot = document.getElementById('custom-cursor-dot');
-  
-  let mouse = { x: -100, y: -100 };
-  let ring = { x: -100, y: -100 };
-  let cursorRotation = 0;
-  let targetRotationSpeed = 1.5;
-  let currentRotationSpeed = 1.5;
+  const cursorTextContainer = document.getElementById('cursor-text-container');
+  const cursorText = document.getElementById('cursor-text');
 
-  // Track mouse coordinates
-  window.addEventListener('mousemove', (e) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-  });
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-  // Custom Cursor Render Loop (Lerping outer ring for organic tail effect)
-  function renderCursor() {
-    // Lerping ring coordinates
-    const ease = 0.5; // Speed factor (snappier)
-    ring.x += (mouse.x - ring.x) * ease;
-    ring.y += (mouse.y - ring.y) * ease;
+  if (!isTouchDevice && cursorRing && cursorDot) {
+    let mouse = { x: -100, y: -100 };
+    let ring = { x: -100, y: -100 };
+    let cursorRotation = 0;
+    let targetRotationSpeed = 1.5;
+    let currentRotationSpeed = 1.5;
 
-    // Smoothly lerp the rotation speed and apply rotation
-    currentRotationSpeed += (targetRotationSpeed - currentRotationSpeed) * 0.1;
-    cursorRotation += currentRotationSpeed;
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    }, { passive: true });
 
-    // Apply styles directly (using translate3d for GPU acceleration + translate(-50%, -50%) for perfect centering)
-    cursorRing.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) translate(-50%, -50%) rotate(${cursorRotation}deg)`;
-    cursorDot.style.transform = `translate3d(${mouse.x}px, ${mouse.y}px, 0) translate(-50%, -50%)`;
-    
-    const cursorTextContainer = document.getElementById('cursor-text-container');
-    if (cursorTextContainer) {
-      cursorTextContainer.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) translate(-50%, -50%)`;
+    function renderCursor() {
+      const ease = 0.45;
+      ring.x += (mouse.x - ring.x) * ease;
+      ring.y += (mouse.y - ring.y) * ease;
+
+      currentRotationSpeed += (targetRotationSpeed - currentRotationSpeed) * 0.1;
+      cursorRotation += currentRotationSpeed;
+
+      cursorRing.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) translate(-50%, -50%) rotate(${cursorRotation}deg)`;
+      cursorDot.style.transform = `translate3d(${mouse.x}px, ${mouse.y}px, 0) translate(-50%, -50%)`;
+
+      if (cursorTextContainer) {
+        cursorTextContainer.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) translate(-50%, -50%)`;
+      }
+
+      requestAnimationFrame(renderCursor);
     }
 
     requestAnimationFrame(renderCursor);
-  }
-  
-  // Check if touch device - do not activate cursor loop if so
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  if (!isTouchDevice) {
-    requestAnimationFrame(renderCursor);
-    
-    // Add hover states to interactive elements (excluding the floating call button)
-    const hoverables = document.querySelectorAll('a:not(.floating-call-btn), button, input, textarea, select, .theme-toggle, .project-card, .skill-card, .social-icon');
-    
+
+    // Hover interactions
+    const hoverables = document.querySelectorAll('a:not(.floating-call-btn), button, input, textarea, select, .theme-toggle, .project-card, .skill-card, .social-icon, .heatmap-cell');
+
     hoverables.forEach(el => {
       el.addEventListener('mouseenter', () => {
-        targetRotationSpeed = 6.0; // Spin extremely fast on hover
-        
+        targetRotationSpeed = 5.0;
+
+        const cursorIcon = el.getAttribute('data-cursor-icon');
         let text = el.getAttribute('data-cursor') || '';
-        if (!text) {
-           if (el.tagName.toLowerCase() === 'a' && !el.classList.contains('social-icon')) text = 'Open';
-           else if (el.tagName.toLowerCase() === 'button') text = 'Click';
-           else if (el.classList.contains('project-card')) text = 'View';
-           else if (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea') text = 'Type';
+
+        if (cursorIcon) {
+          if (cursorText && cursorTextContainer) {
+            cursorText.innerHTML = `<i class="${cursorIcon}"></i>`;
+            cursorTextContainer.classList.add('show-text');
+            cursorRing.classList.add('has-icon');
+            cursorDot.style.opacity = '0';
+          }
+        } else {
+          if (!text) {
+            if (el.tagName.toLowerCase() === 'a' && !el.classList.contains('social-icon')) text = 'Open';
+            else if (el.tagName.toLowerCase() === 'button') text = 'Click';
+            else if (el.classList.contains('project-card')) text = 'View';
+            else if (el.classList.contains('heatmap-cell')) text = 'Check';
+            else if (el.tagName.toLowerCase() === 'input' || el.tagName.toLowerCase() === 'textarea') text = 'Type';
+          }
+
+          if (text && cursorText && cursorTextContainer) {
+            cursorText.innerText = text;
+            cursorTextContainer.classList.add('show-text');
+            cursorRing.classList.add('has-text');
+            cursorDot.style.opacity = '0';
+          }
         }
-        
-        const textSpan = document.getElementById('cursor-text');
-        const textContainer = document.getElementById('cursor-text-container');
-        
-        if (text && textSpan && textContainer) {
-           textSpan.innerText = text;
-           textContainer.classList.add('show-text');
-           cursorRing.classList.add('has-text');
-           cursorDot.style.opacity = '0';
-        }
-        
         cursorRing.classList.add('cursor-hover');
       });
+
       el.addEventListener('mouseleave', () => {
-        targetRotationSpeed = 1.5; // Normal slow spin
-        cursorRing.classList.remove('cursor-hover');
-        
-        const textContainer = document.getElementById('cursor-text-container');
-        if (textContainer) {
-           textContainer.classList.remove('show-text');
-           cursorRing.classList.remove('has-text');
+        targetRotationSpeed = 1.5;
+        cursorRing.classList.remove('cursor-hover', 'has-text', 'has-icon');
+        if (cursorTextContainer) {
+          cursorTextContainer.classList.remove('show-text');
         }
         cursorDot.style.opacity = '1';
       });
     });
 
-    // Add click active states
-    window.addEventListener('mousedown', () => {
-      cursorRing.classList.add('cursor-click');
-    });
-    window.addEventListener('mouseup', () => {
-      cursorRing.classList.remove('cursor-click');
-    });
+    window.addEventListener('mousedown', () => cursorRing.classList.add('cursor-click'));
+    window.addEventListener('mouseup', () => cursorRing.classList.remove('cursor-click'));
   } else {
-    // Safe fallback: remove cursor divs from DOM on touch devices to save resources
     if (cursorRing) cursorRing.remove();
     if (cursorDot) cursorDot.remove();
+    if (cursorTextContainer) cursorTextContainer.remove();
   }
-
 
   // ==========================================
   // 3. IMMERSIVE 3D SPACE BACKGROUND (THREE.JS)
   // ==========================================
   const canvas = document.getElementById('starfield');
-  
-  // Set up Three.js scene
-  const scene = new THREE.Scene();
-  // Add a subtle fog to fade out distant stars into the dark void
-  scene.fog = new THREE.FogExp2(0x050816, 0.0012);
+  let threeJsAnimationId = null;
+  let isHeroInView = true;
 
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
-  camera.position.z = 600;
+  if (canvas && typeof THREE !== 'undefined') {
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050816, 0.0012);
 
-  const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // optimize for high-res
-  renderer.setSize(window.innerWidth, window.innerHeight);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+    camera.position.z = 600;
 
-  // ==========================================
-  // 3D KEYBOARD MODEL GENERATION
-  // ==========================================
-  const keyboardLayout = [
-    ['Esc', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'],
-    ['Tab', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],
-    ['Caps', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", 'Enter'],
-    ['Shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'Shift'],
-    ['Ctrl', 'Win', 'Alt', 'Space', 'Alt', 'Fn', 'Ctrl', 'Left', 'Down', 'Right', '0', '.']
-  ];
-
-  const keyMapDark = new Map();
-  const keyMapLight = new Map();
-  // Generate a texture for a string
-  function createKeycapTexture(text, isLight = false) {
-    const map = isLight ? keyMapLight : keyMapDark;
-    if(map.has(text)) return map.get(text);
-    const canvas = document.createElement('canvas');
-    canvas.width = 1024; // Ultra-high resolution for razor sharp text
-    canvas.height = 1024;
-    const ctx = canvas.getContext('2d');
-    
-    if (isLight) {
-      // Light Mode: Black background, White text
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, 1024, 1024);
-      ctx.fillStyle = '#ffffff';
-    } else {
-      // Dark Mode: White background, Black text
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 1024, 1024);
-      ctx.fillStyle = '#000000';
-    }
-    
-    // NO shadow, NO blur, NO stroke - just pure razor-sharp edges
-    ctx.shadowBlur = 0;
-    
-    // Massive font size scaled for 1024px canvas
-    const fs = text.length > 4 ? 220 : (text.length > 1 ? 320 : 500);
-    ctx.font = `900 ${fs}px system-ui, -apple-system, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    
-    ctx.fillText(text, 512, 532);
-    
-    const tex = new THREE.CanvasTexture(canvas);
-    // Anisotropic filtering ensures text remains razor sharp when tilted in 3D
-    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    map.set(text, tex);
-    return tex;
-  }
-
-  // Premium glass/plastic materials for the body of the keys
-  const blackKeyMat = new THREE.MeshPhysicalMaterial({
-    color: 0x050505, // Black
-    metalness: 0.6,
-    roughness: 0.2,
-    transmission: 0.1, // Less glassy, more solid black
-    thickness: 1.5,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.1
-  });
-
-  const keyboardGroup = new THREE.Group();
-  
-  const baseSize = 34; // Much bigger keys
-  const gap = 4;
-
-  function getKeyWidth(char, rowIndex, colIndex) {
-    let u = 1.0; // Base Unit
-    
-    if (rowIndex === 0 && char === 'Backspace') u = 2.0;
-    else if (rowIndex === 1 && (char === 'Tab' || char === '\\')) u = 1.5;
-    else if (rowIndex === 2 && char === 'Caps') u = 1.75;
-    else if (rowIndex === 2 && char === 'Enter') u = 2.25;
-    else if (rowIndex === 3 && char === 'Shift') u = (colIndex === 0) ? 2.25 : 2.75;
-    else if (rowIndex === 4) {
-      if (char === 'Space') u = 4.0;
-      else u = 1.0; // Modifiers and arrows are tightly packed at 1U
-    }
-
-    // Mathematical formula to convert Units to physical pixels, properly accounting for gaps
-    return u * baseSize + (u - 1) * gap;
-  }
-
-  function createRoundedKeyGeo(width, height, depth, radius) {
-    const shape = new THREE.Shape();
-    const x = -width/2, y = -depth/2;
-    shape.moveTo(x, y + radius);
-    shape.lineTo(x, y + depth - radius);
-    shape.quadraticCurveTo(x, y + depth, x + radius, y + depth);
-    shape.lineTo(x + width - radius, y + depth);
-    shape.quadraticCurveTo(x + width, y + depth, x + width, y + depth - radius);
-    shape.lineTo(x + width, y + radius);
-    shape.quadraticCurveTo(x + width, y, x + width - radius, y);
-    shape.lineTo(x + radius, y);
-    shape.quadraticCurveTo(x, y, x, y + radius);
-
-    const extrudeSettings = {
-      depth: height,
-      bevelEnabled: true,
-      bevelSegments: 4,
-      steps: 1,
-      bevelSize: 1.5,
-      bevelThickness: 2.0
-    };
-
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-
-    // Fix UV mapping for the Lids (ExtrudeGeometry maps raw world coordinates by default)
-    const uv = geometry.attributes.uv;
-    if (uv) {
-      for (let i = 0; i < uv.count; i++) {
-        let u = uv.getX(i);
-        let v = uv.getY(i);
-        // Normalize based on key bounds to map perfectly from 0 to 1
-        uv.setXY(i, u / width + 0.5, v / depth + 0.5);
-      }
-      uv.needsUpdate = true;
-    }
-
-    geometry.rotateX(-Math.PI / 2); // Faces lid upwards
-    geometry.translate(0, -height/2, 0); // Centers geometry vertically
-    return geometry;
-  }
-
-  let startZ = -((keyboardLayout.length * (baseSize + gap)) / 2);
-  const keysList = [];
-
-  keyboardLayout.forEach((row, rowIndex) => {
-    // Calculate total width of row to perfectly center it
-    let rowWidth = 0;
-    row.forEach((char, colIndex) => { 
-      rowWidth += getKeyWidth(char, rowIndex, colIndex) + gap; 
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+      antialias: window.devicePixelRatio < 2,
+      powerPreference: "high-performance"
     });
-    rowWidth -= gap; // remove last gap
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-    let currentX = -(rowWidth / 2);
-    const currentZ = startZ + rowIndex * (baseSize + gap);
+    // Keycap texture generator
+    const keyMapDark = new Map();
+    const keyMapLight = new Map();
 
-    row.forEach((char, colIndex) => {
-      const w = getKeyWidth(char, rowIndex, colIndex);
-      const geo = createRoundedKeyGeo(w, 20, baseSize, 5); // Taller, highly 3D rounded keys
-      
-      // Apply texture to the TOP face (index 0 in ExtrudeGeometry)
-      const topMat = new THREE.MeshPhysicalMaterial({
-        color: 0x050505, // Black top face
-        map: createKeycapTexture(char),
-        emissive: 0xffffff, // Pure white text glow
-        emissiveMap: createKeycapTexture(char),
-        emissiveIntensity: 3.5, // Extreme text brightness
-        roughness: 0.2, // Smoother base surface
-        metalness: 0.5, // Slight metallic sheen
-        clearcoat: 1.0, // High-gloss clearcoat
-        clearcoatRoughness: 0.1 // Polished finish
+    function createKeycapTexture(text, isLight = false) {
+      const map = isLight ? keyMapLight : keyMapDark;
+      if (map.has(text)) return map.get(text);
+
+      const tCanvas = document.createElement('canvas');
+      tCanvas.width = 256;
+      tCanvas.height = 256;
+      const ctx = tCanvas.getContext('2d');
+
+      if (isLight) {
+        // Light Mode: Black keycap surface, Crisp White letters
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, 256, 256);
+        ctx.fillStyle = '#ffffff';
+      } else {
+        // Dark Mode (Default): Clean White keycap surface, Crisp Black letters
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 256, 256);
+        ctx.fillStyle = '#000000';
+      }
+
+      const fs = text.length > 4 ? 52 : (text.length > 1 ? 78 : 120);
+      ctx.font = `900 ${fs}px system-ui, -apple-system, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 128, 132);
+
+      const tex = new THREE.CanvasTexture(tCanvas);
+      map.set(text, tex);
+      return tex;
+    }
+
+    const keyboardLayout = [
+      ['Esc', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'],
+      ['Tab', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],
+      ['Caps', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", 'Enter'],
+      ['Shift', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/', 'Shift'],
+      ['Ctrl', 'Win', 'Alt', 'Space', 'Alt', 'Fn', 'Ctrl', 'Left', 'Down', 'Right', '0', '.']
+    ];
+
+    // Key body material (White in Dark Mode, Black in Light Mode)
+    const keyBodyMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      metalness: 0.1,
+      roughness: 0.25
+    });
+
+    const keyboardGroup = new THREE.Group();
+    const baseSize = 34;
+    const gap = 4;
+
+    function getKeyWidth(char, rowIndex, colIndex) {
+      let u = 1.0;
+      if (rowIndex === 0 && char === 'Backspace') u = 2.0;
+      else if (rowIndex === 1 && (char === 'Tab' || char === '\\')) u = 1.5;
+      else if (rowIndex === 2 && char === 'Caps') u = 1.75;
+      else if (rowIndex === 2 && char === 'Enter') u = 2.25;
+      else if (rowIndex === 3 && char === 'Shift') u = (colIndex === 0) ? 2.25 : 2.75;
+      else if (rowIndex === 4) {
+        if (char === 'Space') u = 4.0;
+        else u = 1.0;
+      }
+      return u * baseSize + (u - 1) * gap;
+    }
+
+    function createRoundedKeyGeo(width, height, depth, radius) {
+      const shape = new THREE.Shape();
+      const x = -width / 2, y = -depth / 2;
+      shape.moveTo(x, y + radius);
+      shape.lineTo(x, y + depth - radius);
+      shape.quadraticCurveTo(x, y + depth, x + radius, y + depth);
+      shape.lineTo(x + width - radius, y + depth);
+      shape.quadraticCurveTo(x + width, y + depth, x + width, y + depth - radius);
+      shape.lineTo(x + width, y + radius);
+      shape.quadraticCurveTo(x + width, y, x + width - radius, y);
+      shape.lineTo(x + radius, y);
+      shape.quadraticCurveTo(x, y, x, y + radius);
+
+      const extrudeSettings = {
+        depth: height,
+        bevelEnabled: true,
+        bevelSegments: 2,
+        steps: 1,
+        bevelSize: 1.5,
+        bevelThickness: 2.0
+      };
+
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      const uv = geometry.attributes.uv;
+      if (uv) {
+        for (let i = 0; i < uv.count; i++) {
+          let u = uv.getX(i);
+          let v = uv.getY(i);
+          uv.setXY(i, u / width + 0.5, v / depth + 0.5);
+        }
+        uv.needsUpdate = true;
+      }
+
+      geometry.rotateX(-Math.PI / 2);
+      geometry.translate(0, -height / 2, 0);
+      return geometry;
+    }
+
+    let startZ = -((keyboardLayout.length * (baseSize + gap)) / 2);
+    const keysList = [];
+
+    keyboardLayout.forEach((row, rowIndex) => {
+      let rowWidth = 0;
+      row.forEach((char, colIndex) => {
+        rowWidth += getKeyWidth(char, rowIndex, colIndex) + gap;
+      });
+      rowWidth -= gap;
+
+      let currentX = -(rowWidth / 2);
+      const currentZ = startZ + rowIndex * (baseSize + gap);
+
+      row.forEach((char, colIndex) => {
+        const w = getKeyWidth(char, rowIndex, colIndex);
+        const geo = createRoundedKeyGeo(w, 20, baseSize, 5);
+
+        // Dark Mode: White Top surface with Black letter
+        const topMat = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          map: createKeycapTexture(char, false),
+          roughness: 0.25,
+          metalness: 0.1
+        });
+
+        const materials = [topMat, keyBodyMat];
+        const mesh = new THREE.Mesh(geo, materials);
+
+        const targetPos = new THREE.Vector3(currentX + w / 2, 0, currentZ);
+        const rX = (Math.random() + Math.random() - 1);
+        const rY = (Math.random() + Math.random() - 1);
+        const scatterPos = new THREE.Vector3(rX * 2500, rY * 1400, (Math.random() - 0.5) * 2000 - 300);
+
+        mesh.position.copy(scatterPos);
+        mesh.userData = {
+          char: char,
+          targetPos: targetPos,
+          scatterPos: scatterPos,
+          scatterVelocity: new THREE.Vector3(0, 0, Math.random() * 3 + 1),
+          targetRot: new THREE.Euler(0, 0, 0),
+          scatterRot: new THREE.Euler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI),
+          rotSpeed: new THREE.Vector3(Math.random() * 0.015, Math.random() * 0.015, Math.random() * 0.015)
+        };
+
+        currentX += w + gap;
+        keyboardGroup.add(mesh);
+        keysList.push(mesh);
+      });
+    });
+
+    // Keyboard Chassis Baseplate (White Chassis with Blue Neon Edges & Glow)
+    const chassisGeo = createRoundedKeyGeo(590, 15, 210, 10);
+    const chassisMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      metalness: 0.1,
+      roughness: 0.25,
+      transparent: true,
+      opacity: 0.9
+    });
+    const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+
+    const chassisEdgesGeo = new THREE.EdgesGeometry(chassisGeo);
+    const chassisEdgesMat = new THREE.LineBasicMaterial({
+      color: 0x00d8ff,
+      transparent: true,
+      opacity: 1.0
+    });
+    const chassisEdges = new THREE.LineSegments(chassisEdgesGeo, chassisEdgesMat);
+    chassis.add(chassisEdges);
+
+    // Blue Neon Shade Underglow Light
+    const chassisLight = new THREE.PointLight(0x00d8ff, 4.0, 500);
+    chassisLight.position.set(0, 35, 0);
+    chassis.add(chassisLight);
+
+    const chassisTargetPos = new THREE.Vector3(0, -15, -19);
+    const chassisScatterPos = new THREE.Vector3(0, -1200, -2500);
+
+    chassis.position.copy(chassisScatterPos);
+    chassis.userData = {
+      targetPos: chassisTargetPos,
+      scatterPos: chassisScatterPos,
+      scatterVelocity: new THREE.Vector3(0, -3, -10),
+      targetRot: new THREE.Euler(0, 0, 0),
+      scatterRot: new THREE.Euler(Math.random(), Math.random(), Math.random()),
+      rotSpeed: new THREE.Vector3(0.01, 0.01, 0.01)
+    };
+    keyboardGroup.add(chassis);
+    keysList.push(chassis);
+
+    // Background floating keys: increased count for an immersive dense swarm when keys spread out
+    const allChars = keyboardLayout.flat();
+    const floatingKeyCount = 320;
+
+    for (let i = 0; i < floatingKeyCount; i++) {
+      const char = allChars[Math.floor(Math.random() * allChars.length)];
+      const w = getKeyWidth(char);
+      const geo = createRoundedKeyGeo(w, 20, baseSize, 5);
+
+      const topMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: createKeycapTexture(char, false),
+        roughness: 0.25,
+        metalness: 0.1
       });
 
-      // ExtrudeGeometry uses index 0 for Lids (Top/Bottom) and index 1 for Sides
-      const materials = [topMat, blackKeyMat];
-
-      const mesh = new THREE.Mesh(geo, materials);
-      
-      // Target position in the assembled keyboard
-      const targetPos = new THREE.Vector3(currentX + w/2, 0, currentZ);
-      
-      // Scattered position for the flying state (spread massively all over the screen)
+      const mesh = new THREE.Mesh(geo, [topMat, keyBodyMat]);
       const rX = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
       const rY = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
       const scatterPos = new THREE.Vector3(
-        rX * 3500,
-        rY * 1800,
-        (Math.random() - 0.5) * 3000 - 400
-      );
-      
-      // Velocity for flying
-      const scatterVelocity = new THREE.Vector3(
-        0, 
-        0, 
-        Math.random() * 4 + 1 // fly forward
+        rX * 3600,
+        rY * 2200,
+        (Math.random() - 0.5) * 3600 - 400
       );
 
       mesh.position.copy(scatterPos);
-      
-      // Store animation states
+      const randomRealKey = keysList[Math.floor(Math.random() * (keysList.length - 1))];
+      const mergePos = randomRealKey ? randomRealKey.userData.targetPos.clone() : scatterPos;
+      mergePos.y -= 2;
+
       mesh.userData = {
         char: char,
-        targetPos: targetPos,
+        targetPos: mergePos,
         scatterPos: scatterPos,
-        scatterVelocity: scatterVelocity,
+        scatterVelocity: new THREE.Vector3(0, 0, Math.random() * 4.5 + 1.5),
         targetRot: new THREE.Euler(0, 0, 0),
         scatterRot: new THREE.Euler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI),
-        rotSpeed: new THREE.Vector3(Math.random()*0.02, Math.random()*0.02, Math.random()*0.02)
+        rotSpeed: new THREE.Vector3(Math.random() * 0.015, Math.random() * 0.015, Math.random() * 0.015)
       };
 
-      currentX += w + gap;
       keyboardGroup.add(mesh);
       keysList.push(mesh);
-    });
-  });
-
-  // Add an Ultra-Premium Neon Baseplate (Keyboard Chassis)
-  // Perfectly sized to exactly wrap the 15U keyboard length with a 12px margin
-  const chassisGeo = createRoundedKeyGeo(590, 15, 210, 10);
-  const chassisMat = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    emissive: 0x000000,
-    metalness: 0.2, // Subtle metallic sheen
-    roughness: 0.35, // Frosted glass finish
-    transmission: 0.95, // High glass transmission
-    thickness: 25, // Thick premium acrylic/glass
-    ior: 1.5, // Real glass index of refraction
-    transparent: true,
-    opacity: 1.0,
-    clearcoat: 1.0, // High-gloss polished exterior
-    clearcoatRoughness: 0.05,
-    envMapIntensity: 1.5 // Enhance reflections
-  });
-  const chassis = new THREE.Mesh(chassisGeo, chassisMat);
-  
-  // Add intense glowing neon edges
-  const chassisEdgesGeo = new THREE.EdgesGeometry(chassisGeo);
-  const chassisEdgesMat = new THREE.LineBasicMaterial({ 
-    color: 0x00d8ff, 
-    transparent: true, 
-    opacity: 0.9 
-  });
-  const chassisEdges = new THREE.LineSegments(chassisEdgesGeo, chassisEdgesMat);
-  chassis.add(chassisEdges);
-
-  // Cast actual neon light from the chassis onto the flying keys
-  const chassisLight = new THREE.PointLight(0x00d8ff, 250, 600);
-  chassisLight.position.set(0, 50, 0); // Floats just above the chassis to light the keys
-  chassis.add(chassisLight);
-  
-  const chassisTargetPos = new THREE.Vector3(0, -15, -19); // Directly under the centered keys
-  const chassisScatterPos = new THREE.Vector3(0, -1500, -3000); // Flies deep down and away
-  
-  chassis.position.copy(chassisScatterPos);
-  chassis.userData = {
-    targetPos: chassisTargetPos,
-    scatterPos: chassisScatterPos,
-    scatterVelocity: new THREE.Vector3(0, -4, -15),
-    targetRot: new THREE.Euler(0, 0, 0),
-    scatterRot: new THREE.Euler(Math.random(), Math.random(), Math.random()),
-    rotSpeed: new THREE.Vector3(0.01, 0.01, 0.01)
-  };
-  keyboardGroup.add(chassis);
-  keysList.push(chassis);
-
-  // Generate 1200 extra dummy keys that fly forever in the background
-  const allChars = keyboardLayout.flat();
-  for(let i = 0; i < 1200; i++) {
-    const char = allChars[Math.floor(Math.random() * allChars.length)];
-    const w = getKeyWidth(char);
-    const geo = createRoundedKeyGeo(w, 20, baseSize, 5);
-    
-    const topMat = new THREE.MeshPhysicalMaterial({
-      color: 0x050505, // Black top face
-      map: createKeycapTexture(char),
-      emissive: 0xffffff, // Pure white text glow
-      emissiveMap: createKeycapTexture(char),
-      emissiveIntensity: 3.5, // Extreme text brightness
-      roughness: 0.2, // Smoother base surface
-      metalness: 0.5, // Slight metallic sheen
-      clearcoat: 1.0, // High-gloss clearcoat
-      clearcoatRoughness: 0.1 // Polished finish
-    });
-
-    // ExtrudeGeometry uses index 0 for Lids (Top/Bottom) and index 1 for Sides
-    const materials = [topMat, blackKeyMat];
-    const mesh = new THREE.Mesh(geo, materials);
-    
-    // Center-weighted distribution (approx normal) to force a dense swarm in the center
-    const rX = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
-    const rY = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
-    
-    const scatterPos = new THREE.Vector3(
-      rX * 3500, // Densly packed around x=0
-      rY * 1800, // Densly packed around y=0
-      (Math.random() - 0.5) * 4000 - 500
-    );
-    
-    mesh.position.copy(scatterPos);
-    
-    // Pick a random real key's target position to merge into when assembling!
-    const randomRealKey = keysList[Math.floor(Math.random() * (keysList.length - 1))];
-    const mergePos = randomRealKey ? randomRealKey.userData.targetPos.clone() : scatterPos;
-    mergePos.y -= 2; // Sink slightly inside the real keycap to prevent heavy Z-fighting
-
-    mesh.userData = {
-      char: char,
-      targetPos: mergePos, 
-      scatterPos: scatterPos,
-      scatterVelocity: new THREE.Vector3(0, 0, Math.random() * 6 + 2), // Fly faster
-      targetRot: new THREE.Euler(0, 0, 0),
-      scatterRot: new THREE.Euler(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI),
-      rotSpeed: new THREE.Vector3(Math.random()*0.02, Math.random()*0.02, Math.random()*0.02)
-    };
-    
-    keyboardGroup.add(mesh);
-    keysList.push(mesh);
-  }
-
-  // Position and tilt the keyboard
-  keyboardGroup.scale.set(1.5, 1.5, 1.5); // MASSIVE 3D PRESENCE
-  keyboardGroup.rotation.x = Math.PI / 5.5; // Natural 3D desk tilt
-  keyboardGroup.rotation.y = 0;
-  keyboardGroup.rotation.z = 0;
-  keyboardGroup.position.z = -150; 
-  keyboardGroup.position.y = -100; // Fixed clearly at the bottom
-  scene.add(keyboardGroup);
-
-  // Add Premium Luxury Studio Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Deeper contrast for luxury feel
-  scene.add(ambientLight);
-
-  // Key Light: Warm, elegant studio highlight
-  const mainLight = new THREE.DirectionalLight(0xfffae6, 4.5); 
-  mainLight.position.set(150, 400, 250);
-  scene.add(mainLight);
-
-  // Fill Light: Soft, cinematic cool blue
-  const dirLight = new THREE.DirectionalLight(0x60a5fa, 2.5); 
-  dirLight.position.set(-250, 150, 150);
-  scene.add(dirLight);
-
-  // Rim Light: Powerful backlight to carve out the glass edges and clearcoat
-  const dirLight2 = new THREE.DirectionalLight(0xe0e7ff, 6.0); 
-  dirLight2.position.set(0, 100, -350);
-  scene.add(dirLight2);
-
-  // Immersive interactive light: Elegant cyan/white aura that gracefully follows mouse
-  const mouseLight = new THREE.PointLight(0x00e5ff, 5.0, 600); 
-  scene.add(mouseLight);
-
-  // ==========================================
-  // IMMERSIVE 3D BACKGROUND (STARDUST)
-  // ==========================================
-  const starCount = 5000;
-  const starGeo = new THREE.BufferGeometry();
-  const starPos = new Float32Array(starCount * 3);
-  const starVel = [];
-
-  for(let i=0; i<starCount; i++) {
-    starPos[i*3] = (Math.random() - 0.5) * 4000;     // x
-    starPos[i*3+1] = (Math.random() - 0.5) * 4000;   // y
-    starPos[i*3+2] = (Math.random() - 0.5) * 4000;   // z
-    starVel.push((Math.random() - 0.5) * 2); 
-  }
-  
-  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-  
-  // Custom glowing star material
-  const particleCanvas = document.createElement('canvas');
-  particleCanvas.width = 32;
-  particleCanvas.height = 32;
-  const pCtx = particleCanvas.getContext('2d');
-  const gradient = pCtx.createRadialGradient(16, 16, 0, 16, 16, 16);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.2, 'rgba(0, 216, 255, 0.8)'); // Cyan core
-  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  pCtx.fillStyle = gradient;
-  pCtx.fillRect(0, 0, 32, 32);
-  const particleTexture = new THREE.CanvasTexture(particleCanvas);
-
-  const starMat = new THREE.PointsMaterial({
-    color: 0xffffff,
-    size: 10,
-    map: particleTexture,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-
-  const starSystem = new THREE.Points(starGeo, starMat);
-  scene.add(starSystem);
-
-  // Mouse Parallax Tracking
-  let starMouse = { targetX: 0, targetY: 0 };
-  let currentCameraX = 0;
-  let currentCameraY = 0;
-
-  window.addEventListener('mousemove', (e) => {
-    starMouse.targetX = (e.clientX - window.innerWidth / 2) * 0.3;
-    starMouse.targetY = (e.clientY - window.innerHeight / 2) * 0.3;
-  });
-
-  window.addEventListener('mouseleave', () => {
-    starMouse.targetX = 0;
-    starMouse.targetY = 0;
-  });
-
-  // Intro Animation Tracking
-  let assembleProgress = 1.0;
-  let targetAssembleProgress = 1.0;
-  let hasIntroExploded = false;
-
-  // 5 seconds after visiting the website, explode the keyboard into flying keys!
-  setTimeout(() => {
-    if (window.scrollY < 100) {
-      targetAssembleProgress = 0.0;
-    }
-    hasIntroExploded = true;
-  }, 5000);
-
-  // Scroll logic: re-assemble the keyboard when scrolling down!
-  window.addEventListener('scroll', () => {
-    if (!hasIntroExploded) return; // Let intro happen first!
-
-    const scrollY = window.scrollY;
-    // Keys magnetically snap back to the keyboard layout VERY fast as you scroll down
-    const scrollProgress = Math.min(scrollY / 200, 1.0); 
-    targetAssembleProgress = scrollProgress;
-  });
-
-  function resizeCanvas() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-  
-  window.addEventListener('resize', resizeCanvas);
-
-  // Animation Loop
-  let time = 0;
-  function animateStars() {
-    time += 0.02;
-    
-    // Animate individual keys
-    keysList.forEach(mesh => {
-       const ud = mesh.userData;
-       
-       // 1. Update scattered position (flying)
-       ud.scatterPos.add(ud.scatterVelocity);
-       if (ud.scatterPos.z > 600) {
-           ud.scatterPos.z -= 1800; // Wrap around to deep space
-       }
-       
-       // Update scattered rotation
-       ud.scatterRot.x += ud.rotSpeed.x;
-       ud.scatterRot.y += ud.rotSpeed.y;
-       ud.scatterRot.z += ud.rotSpeed.z;
-
-       // 2. Blend between scattered and target based on assembleProgress
-       mesh.position.lerpVectors(ud.scatterPos, ud.targetPos, assembleProgress);
-       
-       // Blend rotation using Quaternion slerp
-       const qScatter = new THREE.Quaternion().setFromEuler(ud.scatterRot);
-       const qTarget = new THREE.Quaternion().setFromEuler(ud.targetRot);
-       mesh.quaternion.slerpQuaternions(qScatter, qTarget, assembleProgress);
-    });
-
-    // Different speeds for assembling (fast snap) vs disassembling (cinematic spread)
-    if (targetAssembleProgress > assembleProgress) {
-      assembleProgress += (targetAssembleProgress - assembleProgress) * 0.12; // Fast Assembly
-    } else {
-      assembleProgress += (targetAssembleProgress - assembleProgress) * 0.008; // Very Slow, Dreamy Disassembly
     }
 
-    // Smooth floating for the whole keyboard group (only bob when scattered, fixed when assembled)
-    const bobbing = Math.sin(time * 0.8) * 8 * (1 - assembleProgress);
-    keyboardGroup.position.y = -100 + bobbing;
-    
-    // Smooth camera/group parallax based on mouse
-    currentCameraX += (starMouse.targetX - currentCameraX) * 0.05;
-    currentCameraY += (starMouse.targetY - currentCameraY) * 0.05;
+    keyboardGroup.scale.set(1.4, 1.4, 1.4);
+    keyboardGroup.rotation.x = Math.PI / 5.5;
+    keyboardGroup.position.z = -150;
+    keyboardGroup.position.y = -100;
+    scene.add(keyboardGroup);
 
-    // Rotate the group slightly based on mouse parallax, keeping original desk tilt (Math.PI / 5.5)
-    keyboardGroup.rotation.y = Math.sin(time * 0.4) * 0.05 + (assembleProgress * 0.1) + (currentCameraX * 0.002);
-    keyboardGroup.rotation.x = (Math.PI / 5.5) + (currentCameraY * 0.002);
-    keyboardGroup.rotation.z = 0;
-    
-    // Animate Stardust
-    const positions = starGeo.attributes.position.array;
-    for(let i=0; i<starCount; i++) {
-      positions[i*3+2] += starVel[i] + (1 - assembleProgress) * 8; // Hyperspace effect when exploded
-      if (positions[i*3+2] > 1000) {
-        positions[i*3+2] = -3000;
+    // Studio Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    scene.add(ambientLight);
+
+    const mainLight = new THREE.DirectionalLight(0xfffae6, 3.5);
+    mainLight.position.set(150, 400, 250);
+    scene.add(mainLight);
+
+    const dirLight = new THREE.DirectionalLight(0x60a5fa, 2.0);
+    dirLight.position.set(-250, 150, 150);
+    scene.add(dirLight);
+
+    const mouseLight = new THREE.PointLight(0x00e5ff, 3.5, 500);
+    scene.add(mouseLight);
+
+    // Stardust Particle System (1500 particles for high-performance rendering)
+    const starCount = 1500;
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(starCount * 3);
+    const starVel = new Float32Array(starCount);
+
+    for (let i = 0; i < starCount; i++) {
+      starPos[i * 3] = (Math.random() - 0.5) * 3500;
+      starPos[i * 3 + 1] = (Math.random() - 0.5) * 3500;
+      starPos[i * 3 + 2] = (Math.random() - 0.5) * 3500;
+      starVel[i] = (Math.random() - 0.5) * 2;
+    }
+
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+
+    const particleCanvas = document.createElement('canvas');
+    particleCanvas.width = 16;
+    particleCanvas.height = 16;
+    const pCtx = particleCanvas.getContext('2d');
+    const gradient = pCtx.createRadialGradient(8, 8, 0, 8, 8, 8);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.3, 'rgba(0, 216, 255, 0.8)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    pCtx.fillStyle = gradient;
+    pCtx.fillRect(0, 0, 16, 16);
+    const particleTexture = new THREE.CanvasTexture(particleCanvas);
+
+    const starMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 8,
+      map: particleTexture,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    const starSystem = new THREE.Points(starGeo, starMat);
+    scene.add(starSystem);
+
+    // Mouse Parallax
+    let starMouse = { targetX: 0, targetY: 0 };
+    let currentCameraX = 0;
+    let currentCameraY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      starMouse.targetX = (e.clientX - window.innerWidth / 2) * 0.25;
+      starMouse.targetY = (e.clientY - window.innerHeight / 2) * 0.25;
+    }, { passive: true });
+
+    let assembleProgress = 1.0;
+    let targetAssembleProgress = 1.0;
+    let hasIntroExploded = false;
+
+    setTimeout(() => {
+      if (window.scrollY < 100) {
+        targetAssembleProgress = 0.0;
       }
+      hasIntroExploded = true;
+    }, 4500);
+
+    window.addEventListener('scroll', () => {
+      if (!hasIntroExploded) return;
+      const scrollProgress = Math.min(window.scrollY / 220, 1.0);
+      targetAssembleProgress = scrollProgress;
+    }, { passive: true });
+
+    function resizeCanvas() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
-    starGeo.attributes.position.needsUpdate = true;
-    
-    // Slowly rotate the entire star system for organic feel
-    starSystem.rotation.y += 0.0005;
-    starSystem.rotation.x += 0.0002;
-    
-    // Move PointLight to follow mouse
-    mouseLight.position.x = currentCameraX;
-    mouseLight.position.y = -currentCameraY + 40;
-    mouseLight.position.z = -20;
+    window.addEventListener('resize', resizeCanvas, { passive: true });
 
-    camera.position.x = currentCameraX * 0.4;
-    camera.position.y = -currentCameraY * 0.4; 
-    camera.lookAt(new THREE.Vector3(0, -20, -100)); // Look slightly down towards keyboard
+    // Pre-allocated math objects to prevent garbage collection frame drops
+    const qScatter = new THREE.Quaternion();
+    const qTarget = new THREE.Quaternion();
+    const lookTarget = new THREE.Vector3(0, -20, -100);
 
-    renderer.render(scene, camera);
-    requestAnimationFrame(animateStars);
+    let time = 0;
+    function animateStars() {
+      if (!isHeroInView) {
+        threeJsAnimationId = null;
+        return;
+      }
+
+      time += 0.02;
+
+      for (let i = 0; i < keysList.length; i++) {
+        const mesh = keysList[i];
+        const ud = mesh.userData;
+
+        ud.scatterPos.add(ud.scatterVelocity);
+        if (ud.scatterPos.z > 600) {
+          ud.scatterPos.z -= 1800;
+        }
+
+        ud.scatterRot.x += ud.rotSpeed.x;
+        ud.scatterRot.y += ud.rotSpeed.y;
+        ud.scatterRot.z += ud.rotSpeed.z;
+
+        mesh.position.lerpVectors(ud.scatterPos, ud.targetPos, assembleProgress);
+
+        qScatter.setFromEuler(ud.scatterRot);
+        qTarget.setFromEuler(ud.targetRot);
+        mesh.quaternion.slerpQuaternions(qScatter, qTarget, assembleProgress);
+      }
+
+      if (targetAssembleProgress > assembleProgress) {
+        assembleProgress += (targetAssembleProgress - assembleProgress) * 0.12;
+      } else {
+        assembleProgress += (targetAssembleProgress - assembleProgress) * 0.008;
+      }
+
+      const bobbing = Math.sin(time * 0.8) * 6 * (1 - assembleProgress);
+      keyboardGroup.position.y = -100 + bobbing;
+
+      currentCameraX += (starMouse.targetX - currentCameraX) * 0.05;
+      currentCameraY += (starMouse.targetY - currentCameraY) * 0.05;
+
+      keyboardGroup.rotation.y = Math.sin(time * 0.4) * 0.04 + (assembleProgress * 0.08) + (currentCameraX * 0.0015);
+      keyboardGroup.rotation.x = (Math.PI / 5.5) + (currentCameraY * 0.0015);
+
+      const positions = starGeo.attributes.position.array;
+      for (let i = 0; i < starCount; i++) {
+        positions[i * 3 + 2] += starVel[i] + (1 - assembleProgress) * 6;
+        if (positions[i * 3 + 2] > 1000) {
+          positions[i * 3 + 2] = -3000;
+        }
+      }
+      starGeo.attributes.position.needsUpdate = true;
+
+      starSystem.rotation.y += 0.0004;
+
+      mouseLight.position.x = currentCameraX;
+      mouseLight.position.y = -currentCameraY + 40;
+      mouseLight.position.z = -20;
+
+      camera.position.x = currentCameraX * 0.35;
+      camera.position.y = -currentCameraY * 0.35;
+      camera.lookAt(lookTarget);
+
+      renderer.render(scene, camera);
+      threeJsAnimationId = requestAnimationFrame(animateStars);
+    }
+
+    // Viewport-aware rendering: Pauses Three.js when Hero is scrolled out of view (HUGE performance boost!)
+    const heroSection = document.getElementById('home');
+    if (heroSection) {
+      const heroObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          isHeroInView = entry.isIntersecting;
+          if (isHeroInView && !threeJsAnimationId) {
+            threeJsAnimationId = requestAnimationFrame(animateStars);
+          }
+        });
+      }, { threshold: 0.05 });
+      heroObserver.observe(heroSection);
+    }
+
+    // Theme updater for Three.js
+    window.updateThreeJSTheme = function (isLight) {
+      if (!scene) return;
+      if (isLight) {
+        // Light Mode: Black keyboard with white letters
+        scene.fog.color.setHex(0xfafcff);
+        chassisMat.color.setHex(0x0f172a);
+        chassisEdgesMat.color.setHex(0x0284c7);
+        chassisLight.color.setHex(0x0284c7);
+        keyBodyMat.color.setHex(0x0f172a);
+
+        keysList.forEach(mesh => {
+          if (mesh === chassis) return;
+          mesh.material[0].color.setHex(0x0f172a);
+          mesh.material[0].map = createKeycapTexture(mesh.userData.char, true);
+          mesh.material[0].needsUpdate = true;
+        });
+      } else {
+        // Dark Mode: White keyboard with black letters and blue neon shade
+        scene.fog.color.setHex(0x050816);
+        chassisMat.color.setHex(0xffffff);
+        chassisEdgesMat.color.setHex(0x00d8ff);
+        chassisLight.color.setHex(0x00d8ff);
+        keyBodyMat.color.setHex(0xffffff);
+
+        keysList.forEach(mesh => {
+          if (mesh === chassis) return;
+          mesh.material[0].color.setHex(0xffffff);
+          mesh.material[0].map = createKeycapTexture(mesh.userData.char, false);
+          mesh.material[0].needsUpdate = true;
+        });
+      }
+    };
   }
-
-  // Start Loop
-  animateStars();
-
 
   // ==========================================
   // 4. HERO TEXT TYPING EFFECT
   // ==========================================
   const typedTextSpan = document.getElementById('typed-text');
-  const textArray = ["Full-Stack Applications.", "Immersive UI Animations.", "Liquid Glass Designs.", "Next-Gen User Experiences."];
-  const typingSpeed = 100;
-  const erasingSpeed = 50;
-  const newTextDelay = 2000; // Delay between texts
-  let textArrayIndex = 0;
-  let charIndex = 0;
+  if (typedTextSpan) {
+    const textArray = ["Full-Stack Applications.", "Immersive UI Animations.", "Liquid Glass Designs.", "Next-Gen User Experiences."];
+    let textArrayIndex = 0;
+    let charIndex = 0;
 
-  function type() {
-    if (charIndex < textArray[textArrayIndex].length) {
-      typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
-      charIndex++;
-      setTimeout(type, typingSpeed);
-    } else {
-      setTimeout(erase, newTextDelay);
+    function type() {
+      if (charIndex < textArray[textArrayIndex].length) {
+        typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
+        charIndex++;
+        setTimeout(type, 90);
+      } else {
+        setTimeout(erase, 2000);
+      }
     }
-  }
 
-  function erase() {
-    if (charIndex > 0) {
-      typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex - 1);
-      charIndex--;
-      setTimeout(erase, erasingSpeed);
-    } else {
-      textArrayIndex++;
-      if (textArrayIndex >= textArray.length) textArrayIndex = 0;
-      setTimeout(type, typingSpeed + 500);
+    function erase() {
+      if (charIndex > 0) {
+        typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex - 1);
+        charIndex--;
+        setTimeout(erase, 45);
+      } else {
+        textArrayIndex = (textArrayIndex + 1) % textArray.length;
+        setTimeout(type, 400);
+      }
     }
+
+    setTimeout(type, 1200);
   }
-
-  // Run typing animation after loader finishes
-  setTimeout(type, 1500);
-
 
   // ==========================================
-  // 5. STICKY NAVBAR & MOBILE MENU
+  // 5. UNIFIED THROTTLED SCROLL HANDLER
   // ==========================================
   const navbar = document.getElementById('navbar');
   const hamburgerBtn = document.getElementById('hamburger-btn');
   const navMenu = document.getElementById('nav-menu');
   const navLinks = document.querySelectorAll('.nav-link');
-
-  // Sticky Scroll Listener
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      navbar.classList.add('navbar-scrolled');
-    } else {
-      navbar.classList.remove('navbar-scrolled');
-    }
-  });
-
-  // Mobile navigation trigger
-  hamburgerBtn.addEventListener('click', () => {
-    hamburgerBtn.classList.toggle('active');
-    navMenu.classList.toggle('active');
-  });
-
-  // Close nav when clicking a link
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      hamburgerBtn.classList.remove('active');
-      navMenu.classList.remove('active');
-    });
-  });
-
-
-  // ==========================================
-  // 6. SCROLL-SPY IMPLEMENTATION
-  // ==========================================
   const sections = document.querySelectorAll('section');
+  const timelineProgress = document.getElementById('timeline-progress');
+  const timelineItems = document.querySelectorAll('.timeline-item');
+  const experienceSection = document.getElementById('experience');
 
-  window.addEventListener('scroll', () => {
-    let current = '';
-    const scrollPos = window.scrollY + 120; // Offset navbar size
-    
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.clientHeight;
-      if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-        current = section.getAttribute('id');
-      }
+  if (hamburgerBtn && navMenu) {
+    hamburgerBtn.addEventListener('click', () => {
+      hamburgerBtn.classList.toggle('active');
+      navMenu.classList.toggle('active');
     });
 
     navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === `#${current}`) {
-        link.classList.add('active');
+      link.addEventListener('click', () => {
+        hamburgerBtn.classList.remove('active');
+        navMenu.classList.remove('active');
+      });
+    });
+  }
+
+  function onScrollTick() {
+    const scrollY = window.scrollY;
+
+    // 1. Sticky navbar state
+    if (navbar) {
+      if (scrollY > 50) navbar.classList.add('navbar-scrolled');
+      else navbar.classList.remove('navbar-scrolled');
+    }
+
+    // 2. Scroll Spy navigation
+    let currentSectionId = '';
+    const scrollPos = scrollY + 120;
+
+    sections.forEach(sec => {
+      const top = sec.offsetTop;
+      const height = sec.clientHeight;
+      if (scrollPos >= top && scrollPos < top + height) {
+        currentSectionId = sec.getAttribute('id');
       }
     });
-  });
 
+    if (currentSectionId) {
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === `#${currentSectionId}`) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    }
+
+    // 3. Timeline Progress Indicator
+    if (experienceSection && timelineProgress) {
+      const timelineTop = experienceSection.offsetTop;
+      const timelineHeight = experienceSection.clientHeight;
+      const scrollPosition = scrollY + window.innerHeight * 0.6;
+
+      let relativeProgress = scrollPosition - timelineTop;
+      let progressPercent = Math.max(0, Math.min(100, (relativeProgress / (timelineHeight * 0.75)) * 100));
+      timelineProgress.style.height = `${progressPercent}%`;
+
+      timelineItems.forEach(item => {
+        const node = item.querySelector('.timeline-node');
+        if (node) {
+          const itemTop = item.offsetTop + timelineTop;
+          if (scrollPosition > itemTop) node.classList.add('active');
+          else node.classList.remove('active');
+        }
+      });
+    }
+  }
+
+  let scrollTicking = false;
+  window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+      requestAnimationFrame(() => {
+        onScrollTick();
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
 
   // ==========================================
-  // 7. INTERSECTION OBSERVER ANIMATIONS (Slide & fade)
+  // 6. INTERSECTION OBSERVER ANIMATIONS (Slide & fade)
   // ==========================================
-  const observerOptions = {
-    threshold: 0.15,
-    rootMargin: '0px 0px -50px 0px'
-  };
-
   const genericObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('active');
-        // Unobserve after showing to avoid repeat layouts
         observer.unobserve(entry.target);
       }
     });
-  }, observerOptions);
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
-  const animatedElements = document.querySelectorAll('.fade-in-element');
-  animatedElements.forEach(el => genericObserver.observe(el));
-
+  document.querySelectorAll('.fade-in-element').forEach(el => genericObserver.observe(el));
 
   // ==========================================
-  // 8. SKILLS ANIMATION TRIGGER (circular & linear)
+  // 7. SKILLS ANIMATION TRIGGER
   // ==========================================
-  // Target the inner grid instead of the whole section so it triggers at the right moment
   const skillsGrid = document.querySelector('.skills-grid');
   let skillsAnimated = false;
 
-  const skillsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && !skillsAnimated) {
-        skillsAnimated = true; // Prevent re-triggering during the timeout
-        setTimeout(() => {
-          animateSkills();
-        }, 1700); // 1.7-second delay before starting
-      }
-    });
-  }, { rootMargin: '0px 0px -15% 0px', threshold: 0 }); 
-  // Triggers when the top of the skills grid crosses 15% from the bottom of the screen
-
   if (skillsGrid) {
+    const skillsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !skillsAnimated) {
+          skillsAnimated = true;
+          setTimeout(animateSkills, 500);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
     skillsObserver.observe(skillsGrid);
   }
 
   function animateSkills() {
-    // Plain smooth easeInOut for a perfectly fluid, simple glide
     const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
-    
+
     function animateCount(element, target, duration, delay) {
-      // Force visual reset to 0 immediately
+      if (!element) return;
       element.textContent = "0%";
-      
       setTimeout(() => {
         let startTimestamp = null;
         const step = (timestamp) => {
           if (!startTimestamp) startTimestamp = timestamp;
           const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-          const easeProgress = easeInOutSine(progress);
-          
-          element.textContent = `${Math.floor(easeProgress * target)}%`;
-          
+          element.textContent = `${Math.floor(easeInOutSine(progress) * target)}%`;
           if (progress < 1) {
-            window.requestAnimationFrame(step);
+            requestAnimationFrame(step);
           } else {
             element.textContent = `${target}%`;
           }
         };
-        window.requestAnimationFrame(step);
+        requestAnimationFrame(step);
       }, delay);
     }
 
-    // 1. Linear progress bars fill
     const linearFills = document.querySelectorAll('.skill-bar-fill');
     const linearPercents = document.querySelectorAll('.skill-bar-percent');
 
-    linearFills.forEach((fill, index) => {
+    linearFills.forEach((fill, idx) => {
       const targetPercent = parseInt(fill.getAttribute('data-percent'), 10);
-      const delay = index * 250; // Elegant stagger effect
-      
-      setTimeout(() => {
-        fill.style.width = `${targetPercent}%`;
-      }, delay);
-      
-      animateCount(linearPercents[index], targetPercent, 2500, delay); // 2.5s luxury duration
+      const delay = idx * 150;
+      setTimeout(() => { fill.style.width = `${targetPercent}%`; }, delay);
+      animateCount(linearPercents[idx], targetPercent, 1800, delay);
     });
 
-    // 2. Circular skill SVG meters
     const circularFills = document.querySelectorAll('.radial-progress');
     const circularPercents = document.querySelectorAll('.radial-percent');
 
-    circularFills.forEach((circle, index) => {
+    circularFills.forEach((circle, idx) => {
       const targetPercent = parseInt(circle.getAttribute('data-percent'), 10);
       const radius = 40;
-      const circumference = 2 * Math.PI * radius; // Approx 251.2
+      const circumference = 2 * Math.PI * radius;
       const offset = circumference - (targetPercent / 100) * circumference;
-      const delay = index * 250;
+      const delay = idx * 150;
 
-      setTimeout(() => {
-        circle.style.strokeDashoffset = offset;
-      }, delay);
-      
-      animateCount(circularPercents[index], targetPercent, 2500, delay);
+      setTimeout(() => { circle.style.strokeDashoffset = offset; }, delay);
+      animateCount(circularPercents[idx], targetPercent, 1800, delay);
     });
   }
 
-
   // ==========================================
-  // 9. 3D HOVER TILT EFFECT (Performance-guided)
+  // 8. MAGNETIC SOCIAL ICONS
   // ==========================================
-  const tiltElements = document.querySelectorAll('[data-tilt]');
-  
   if (!isTouchDevice) {
-    tiltElements.forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        
-        // Relative mouse coordinates in element
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        // Midpoints
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        // Rotate calculation (max tilt degrees: 10)
-        const rotateX = ((y - centerY) / centerY) * -10;
-        const rotateY = ((x - centerX) / centerX) * 10;
-        
-        // Apply transform via hardware acceleration
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-        card.style.borderColor = 'rgba(6, 182, 212, 0.4)';
-        card.style.boxShadow = '0 25px 45px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.2)';
-      });
-      
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-        card.style.borderColor = ''; // Reverts to CSS variable border
-        card.style.boxShadow = ''; // Reverts to CSS variable shadow
-      });
-    });
-  }
-
-
-  // ==========================================
-  // 10. TIMELINE SCROLL PROGRESS LINE & GLOW
-  // ==========================================
-  const timelineProgress = document.getElementById('timeline-progress');
-  const timelineNodes = document.querySelectorAll('.timeline-node');
-  const timelineItems = document.querySelectorAll('.timeline-item');
-  const experienceSection = document.getElementById('experience');
-
-  window.addEventListener('scroll', () => {
-    if (!experienceSection) return;
-
-    const timelineTop = experienceSection.offsetTop;
-    const timelineHeight = experienceSection.clientHeight;
-    const scrollPosition = window.scrollY + window.innerHeight * 0.6; // Light up as it hits 60% viewport
-    
-    // Calculate progress line percentage
-    let relativeProgress = scrollPosition - timelineTop;
-    let progressPercent = (relativeProgress / (timelineHeight * 0.75)) * 100;
-    progressPercent = Math.max(0, Math.min(100, progressPercent));
-
-    timelineProgress.style.height = `${progressPercent}%`;
-
-    // Highlight timeline nodes sequentially
-    timelineItems.forEach((item, index) => {
-      const node = item.querySelector('.timeline-node');
-      const itemTop = item.offsetTop + timelineTop;
-      
-      if (scrollPosition > itemTop) {
-        node.classList.add('active');
-      } else {
-        node.classList.remove('active');
-      }
-    });
-  });
-
-
-  // ==========================================
-  // 11. MAGNETIC SOCIAL ICON HOVER
-  // ==========================================
-  const magneticElements = document.querySelectorAll('[data-magnetic]');
-
-  if (!isTouchDevice) {
-    magneticElements.forEach(el => {
+    document.querySelectorAll('[data-magnetic]').forEach(el => {
       el.addEventListener('mousemove', (e) => {
         const rect = el.getBoundingClientRect();
-        
-        // Element center positions
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-        
-        // Mouse distance from center
         const distanceX = e.clientX - centerX;
         const distanceY = e.clientY - centerY;
-        
-        // Shift amount (30% magnetic pull force)
-        el.style.transform = `translate3d(${distanceX * 0.35}px, ${distanceY * 0.35}px, 0) scale3d(1.1, 1.1, 1.1)`;
-        el.style.boxShadow = '0 8px 16px rgba(6, 182, 212, 0.2)';
-      });
-      
+        el.style.transform = `translate3d(${distanceX * 0.3}px, ${distanceY * 0.3}px, 0) scale3d(1.08, 1.08, 1.08)`;
+      }, { passive: true });
+
       el.addEventListener('mouseleave', () => {
-        // Bounce back smoothly
         el.style.transform = 'translate3d(0px, 0px, 0px) scale3d(1, 1, 1)';
-        el.style.boxShadow = '';
       });
     });
   }
 
-
   // ==========================================
-  // 12. DYNAMIC THEME TOGGLE (Persisted state)
+  // 9. THEME TOGGLE
   // ==========================================
-  
-  function updateThreeJSTheme(isLight) {
-    if (typeof scene === 'undefined') return;
-    
-    if (isLight) {
-      scene.fog.color.setHex(0xfafcff);
-      
-      // Light Mode: Smoked Glass Keyboard
-      chassisMat.color.setHex(0x050505); 
-      chassisMat.emissive.setHex(0x000000); 
-      chassisEdgesMat.color.setHex(0x222222); 
-      chassisEdgesMat.opacity = 0.2; // Very subtle edges for premium look
-      chassisLight.color.setHex(0x050505); 
-      
-      blackKeyMat.color.setHex(0x050505); // Black key sides
-      keysList.forEach(mesh => {
-        if (mesh === chassis) return;
-        mesh.material[0].color.setHex(0x050505); // Black key top
-        mesh.material[0].emissive.setHex(0xffffff); // White text glow
-        mesh.material[0].map = createKeycapTexture(mesh.userData.char, true);
-        mesh.material[0].emissiveMap = createKeycapTexture(mesh.userData.char, true);
-        mesh.material[0].needsUpdate = true;
-      });
-    } else {
-      scene.fog.color.setHex(0x050816);
-      
-      // Dark Mode: Milky Frosted Glass Keyboard
-      chassisMat.color.setHex(0xffffff); 
-      chassisMat.emissive.setHex(0x111111); // extremely subtle glow
-      chassisEdgesMat.color.setHex(0xffffff);
-      chassisEdgesMat.opacity = 0.2; // Premium subtle highlight edges
-      chassisLight.color.setHex(0xffffff);
-      
-      blackKeyMat.color.setHex(0xf0f0f0);
-      keysList.forEach(mesh => {
-        if (mesh === chassis) return;
-        mesh.material[0].color.setHex(0xffffff);
-        mesh.material[0].emissive.setHex(0x000000);
-        mesh.material[0].map = createKeycapTexture(mesh.userData.char, false);
-        mesh.material[0].emissiveMap = createKeycapTexture(mesh.userData.char, false);
-        mesh.material[0].needsUpdate = true;
-      });
-    }
-  }
-
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const currentTheme = localStorage.getItem('theme');
 
-  // Check storage on page load
   if (currentTheme === 'light') {
     document.body.classList.add('light-theme');
-    updateThreeJSTheme(true);
-  } else {
-    updateThreeJSTheme(false);
+    if (window.updateThreeJSTheme) window.updateThreeJSTheme(true);
   }
 
-  themeToggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('light-theme');
-    
-    const isLight = document.body.classList.contains('light-theme');
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    updateThreeJSTheme(isLight);
-  });
-
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light-theme');
+      const isLight = document.body.classList.contains('light-theme');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      if (window.updateThreeJSTheme) window.updateThreeJSTheme(isLight);
+    });
+  }
 
   // ==========================================
-  // 13. CONTACT FORM SUBMISSION MORPH
+  // 10. CONTACT FORM SUBMISSION MORPH
   // ==========================================
   const contactForm = document.getElementById('contact-form-element');
   const submitBtn = document.getElementById('contact-submit-btn');
 
-  if (contactForm) {
+  if (contactForm && submitBtn) {
     contactForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      
-      // Prevent double submits
       if (submitBtn.classList.contains('loading') || submitBtn.classList.contains('success')) return;
 
-      // 1. Enter Loading morph state
       submitBtn.classList.add('loading');
-      
-      // Simulate API call/processing delay (2 seconds)
       setTimeout(() => {
-        // 2. Enter Success morph state
         submitBtn.classList.remove('loading');
         submitBtn.classList.add('success');
-        
-        // Reset inputs
         contactForm.reset();
-        
-        // Reset label state
-        document.querySelectorAll('.form-control').forEach(input => {
-          input.blur();
-        });
+        document.querySelectorAll('.form-control').forEach(input => input.blur());
 
-        // 3. Revert button to normal state after 3 seconds
         setTimeout(() => {
           submitBtn.classList.remove('success');
         }, 3000);
-        
-      }, 2000);
+      }, 1500);
     });
   }
 
   // ==========================================
-  // 14. INITIALIZE 3D VANILLA TILT
+  // 11. CCBP LEARNING STREAK BOARD (SUPABASE)
   // ==========================================
-  if (typeof VanillaTilt !== 'undefined') {
-    VanillaTilt.init(document.querySelectorAll(".glass-panel, .about-img-frame, .project-card"), {
-      max: 12,
-      speed: 400,
+  const SUPABASE_CONFIG = {
+    url: 'https://jfjxzgwjzvjqmeltsgmp.supabase.co',
+    anonKey: 'sb_publishable_GywS2QL1kkRxcY0Targo1w_OMbPNfR8'
+  };
+
+  const streakElements = {
+    currentVal: document.getElementById('current-streak-val'),
+    currentUnit: document.getElementById('current-streak-unit'),
+    currentSub: document.getElementById('current-streak-sub'),
+    longestVal: document.getElementById('longest-streak-val'),
+    longestUnit: document.getElementById('longest-streak-unit'),
+    longestSub: document.getElementById('longest-streak-sub'),
+    totalVal: document.getElementById('total-days-val'),
+    totalUnit: document.getElementById('total-days-unit'),
+    totalSub: document.getElementById('total-days-sub'),
+    todayBadge: document.getElementById('today-status-badge'),
+    todaySub: document.getElementById('today-status-sub'),
+    todayIconImg: document.getElementById('today-status-icon-img'),
+    todayIconBox: document.getElementById('today-status-icon-box'),
+    board: document.getElementById('streak-heatmap-board'),
+    scrollWrap: document.getElementById('heatmap-scroll-wrap'),
+    rangeSummary: document.getElementById('heatmap-range-summary'),
+    lastSync: document.getElementById('streak-last-sync'),
+    tooltip: document.getElementById('streak-tooltip'),
+    tooltipDate: document.getElementById('tooltip-date'),
+    tooltipStatus: document.getElementById('tooltip-status')
+  };
+
+  function formatLocalDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function parseLocalDate(str) {
+    const parts = str.split('-').map(Number);
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  function formatReadableDate(date) {
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function animateNumberCount(el, target, duration = 1200) {
+    if (!el) return;
+    if (target === 0) {
+      el.textContent = '0';
+      return;
+    }
+    let startTime = null;
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      el.textContent = Math.floor(easeOutQuad * target).toLocaleString();
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target.toLocaleString();
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  async function fetchSupabaseCheckins() {
+    try {
+      const endpoint = `${SUPABASE_CONFIG.url}/rest/v1/streak_checkins?select=date,logged_at&order=date.asc`;
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'apikey': SUPABASE_CONFIG.anonKey,
+          'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.warn('Supabase fetch notice:', err);
+      return null;
+    }
+  }
+
+  function computeStreakMetrics(checkins) {
+    const checkinMap = new Map();
+    checkins.forEach(item => {
+      if (item && item.date) checkinMap.set(item.date, item.logged_at);
+    });
+
+    const checkinDates = Array.from(checkinMap.keys()).sort();
+    const totalActiveDays = checkinDates.length;
+
+    const today = new Date();
+    const todayStr = formatLocalDate(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = formatLocalDate(yesterday);
+
+    const hasCheckedInToday = checkinMap.has(todayStr);
+
+    let currentStreak = 0;
+    if (hasCheckedInToday) {
+      let cur = new Date(today);
+      while (checkinMap.has(formatLocalDate(cur))) {
+        currentStreak++;
+        cur.setDate(cur.getDate() - 1);
+      }
+    } else if (checkinMap.has(yesterdayStr)) {
+      let cur = new Date(yesterday);
+      while (checkinMap.has(formatLocalDate(cur))) {
+        currentStreak++;
+        cur.setDate(cur.getDate() - 1);
+      }
+    }
+
+    let longestStreak = 0;
+    if (checkinDates.length > 0) {
+      let tempStreak = 0;
+      let prevDate = null;
+
+      for (const dStr of checkinDates) {
+        const currDate = parseLocalDate(dStr);
+        if (!prevDate) {
+          tempStreak = 1;
+        } else {
+          const diffMs = currDate.getTime() - prevDate.getTime();
+          const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+          if (diffDays === 1) tempStreak++;
+          else if (diffDays > 1) tempStreak = 1;
+        }
+        prevDate = currDate;
+        if (tempStreak > longestStreak) longestStreak = tempStreak;
+      }
+    }
+    longestStreak = Math.max(longestStreak, currentStreak);
+
+    return {
+      checkinMap,
+      totalActiveDays,
+      currentStreak,
+      longestStreak,
+      hasCheckedInToday,
+      todayStr
+    };
+  }
+
+  function renderHeatmapGrid(metrics) {
+    const { checkinMap, todayStr } = metrics;
+    if (!streakElements.board) return;
+
+    const today = new Date();
+    const todayDayOfWeek = today.getDay();
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + (6 - todayDayOfWeek));
+
+    const totalWeeks = 53;
+    const startDate = new Date(endDate);
+    startDate.setDate(endDate.getDate() - (totalWeeks * 7 - 1));
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthLabels = [];
+    let lastMonth = -1;
+
+    for (let w = 0; w < totalWeeks; w++) {
+      const weekStartDate = new Date(startDate);
+      weekStartDate.setDate(startDate.getDate() + w * 7);
+      const m = weekStartDate.getMonth();
+      if (m !== lastMonth) {
+        monthLabels.push({ weekIndex: w, name: monthNames[m] });
+        lastMonth = m;
+      }
+    }
+
+    let html = '<div class="heatmap-months-row">';
+    monthLabels.forEach(ml => {
+      html += `<span class="heatmap-month-label" style="left: ${ml.weekIndex * 17}px">${ml.name}</span>`;
+    });
+    html += '</div>';
+
+    html += '<div class="heatmap-main-grid">';
+    html += '<div class="heatmap-days-col"><span>Sun</span><span>Tue</span><span>Thu</span><span>Sat</span></div>';
+    html += '<div class="heatmap-weeks-container">';
+
+    for (let w = 0; w < totalWeeks; w++) {
+      html += '<div class="heatmap-week-column">';
+      for (let d = 0; d < 7; d++) {
+        const cellDate = new Date(startDate);
+        cellDate.setDate(startDate.getDate() + (w * 7 + d));
+        const cellDateStr = formatLocalDate(cellDate);
+        const isFuture = cellDate > today;
+        const isToday = cellDateStr === todayStr;
+        const isActive = checkinMap.has(cellDateStr);
+        const levelClass = isActive ? 'level-1' : 'level-0';
+        const todayClass = isToday ? 'is-today' : '';
+        const futureClass = isFuture ? 'is-future' : '';
+
+        const readableDate = formatReadableDate(cellDate);
+        const statusText = isActive ? '1 CCBP Check-in' : 'No check-in recorded';
+
+        html += `
+          <div class="heatmap-cell ${levelClass} ${todayClass} ${futureClass}"
+               data-date="${cellDateStr}"
+               data-readable="${readableDate}"
+               data-status="${statusText}"
+               data-active="${isActive ? 'true' : 'false'}"
+               data-istoday="${isToday ? 'true' : 'false'}"
+               title="${readableDate}: ${statusText}">
+          </div>
+        `;
+      }
+      html += '</div>';
+    }
+
+    html += '</div></div>';
+    streakElements.board.innerHTML = html;
+
+    attachHeatmapCellEvents();
+
+    if (streakElements.scrollWrap) {
+      setTimeout(() => {
+        streakElements.scrollWrap.scrollLeft = streakElements.scrollWrap.scrollWidth;
+      }, 50);
+    }
+  }
+
+  function attachHeatmapCellEvents() {
+    const cells = document.querySelectorAll('.heatmap-cell:not(.is-future)');
+    const tooltip = streakElements.tooltip;
+    const tooltipDate = streakElements.tooltipDate;
+    const tooltipStatus = streakElements.tooltipStatus;
+
+    if (!tooltip) return;
+
+    function showTooltip(cell) {
+      const dateStr = cell.getAttribute('data-readable');
+      const statusStr = cell.getAttribute('data-status');
+      const isActive = cell.getAttribute('data-active') === 'true';
+      const isToday = cell.getAttribute('data-istoday') === 'true';
+
+      tooltipDate.textContent = isToday ? `${dateStr} (Today)` : dateStr;
+      tooltipStatus.innerHTML = isActive
+        ? `<i class="fa-solid fa-circle-check" style="color: #10b981;"></i> ${statusStr}`
+        : `<i class="fa-regular fa-circle" style="color: var(--text-muted);"></i> ${statusStr}`;
+
+      const rect = cell.getBoundingClientRect();
+      tooltip.style.left = `${rect.left + rect.width / 2}px`;
+      tooltip.style.top = `${rect.top}px`;
+      tooltip.classList.add('show');
+      tooltip.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideTooltip() {
+      tooltip.classList.remove('show');
+      tooltip.setAttribute('aria-hidden', 'true');
+    }
+
+    cells.forEach(cell => {
+      cell.addEventListener('mouseenter', () => showTooltip(cell));
+      cell.addEventListener('mouseleave', hideTooltip);
+      cell.addEventListener('touchstart', () => showTooltip(cell), { passive: true });
+    });
+
+    document.addEventListener('touchstart', (e) => {
+      if (!e.target.classList.contains('heatmap-cell')) hideTooltip();
+    }, { passive: true });
+  }
+
+  async function initCCBPStreakBoard() {
+    if (!document.getElementById('streak')) return;
+
+    const checkins = await fetchSupabaseCheckins();
+
+    if (!checkins) {
+      if (streakElements.board) {
+        streakElements.board.innerHTML = `
+          <div class="heatmap-loading-state">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; color: #f59e0b;"></i>
+            <span>Unable to load check-in data. Please check connection.</span>
+          </div>
+        `;
+      }
+      if (streakElements.todayBadge) streakElements.todayBadge.textContent = 'Offline';
+      if (streakElements.lastSync) streakElements.lastSync.textContent = 'Offline';
+      return;
+    }
+
+    const metrics = computeStreakMetrics(checkins);
+    // Update Metric Stat Numbers with smooth count-up
+    animateNumberCount(streakElements.currentVal, metrics.currentStreak);
+    animateNumberCount(streakElements.longestVal, metrics.longestStreak);
+    animateNumberCount(streakElements.totalVal, metrics.totalActiveDays);
+
+    if (streakElements.currentUnit) {
+      streakElements.currentUnit.textContent = metrics.currentStreak === 1 ? 'Day' : 'Days';
+    }
+    if (streakElements.longestUnit) {
+      streakElements.longestUnit.textContent = metrics.longestStreak === 1 ? 'Day' : 'Days';
+    }
+    if (streakElements.totalUnit) {
+      streakElements.totalUnit.textContent = metrics.totalActiveDays === 1 ? 'Day' : 'Days';
+    }
+
+    if (streakElements.currentSub) {
+      streakElements.currentSub.textContent = metrics.currentStreak === 1 ? '1 consecutive day' : `${metrics.currentStreak} consecutive days`;
+    }
+    if (streakElements.longestSub) {
+      streakElements.longestSub.textContent = metrics.longestStreak === 1 ? 'Record: 1 day' : `Record: ${metrics.longestStreak} days`;
+    }
+    if (streakElements.totalSub) {
+      streakElements.totalSub.textContent = metrics.totalActiveDays === 1 ? '1 verified learning session' : 'All-time verified sessions';
+    }
+
+    if (streakElements.todayBadge && streakElements.todayIconBox) {
+      if (metrics.hasCheckedInToday) {
+        streakElements.todayBadge.textContent = 'Completed';
+        streakElements.todayBadge.className = 'metric-status-badge completed';
+        if (streakElements.todayIconImg) {
+          streakElements.todayIconImg.src = 'assets/icons/neon_check.jpg';
+          streakElements.todayIconImg.alt = 'Completed';
+        }
+        streakElements.todayIconBox.className = 'metric-icon-box status-glow active-today';
+        if (streakElements.todaySub) streakElements.todaySub.textContent = 'Active check-in logged';
+      } else {
+        streakElements.todayBadge.textContent = 'Pending';
+        streakElements.todayBadge.className = 'metric-status-badge pending';
+        if (streakElements.todayIconImg) {
+          streakElements.todayIconImg.src = 'assets/icons/neon_hourglass.jpg';
+          streakElements.todayIconImg.alt = 'Pending';
+        }
+        streakElements.todayIconBox.className = 'metric-icon-box status-glow pending-today';
+        if (streakElements.todaySub) streakElements.todaySub.textContent = 'Awaiting daily check-in';
+      }
+    }
+
+    if (streakElements.lastSync) streakElements.lastSync.textContent = 'Live • Synced with Supabase';
+    if (streakElements.rangeSummary) {
+      streakElements.rangeSummary.textContent = `${metrics.totalActiveDays} active learning ${metrics.totalActiveDays === 1 ? 'day' : 'days'} in the past 365 days`;
+    }
+
+    renderHeatmapGrid(metrics);
+  }
+
+  initCCBPStreakBoard();
+
+  // ==========================================
+  // 12. INITIALIZE 3D VANILLA TILT (Subtle & Smooth)
+  // ==========================================
+  if (typeof VanillaTilt !== 'undefined' && !isTouchDevice) {
+    VanillaTilt.init(document.querySelectorAll(".glass-panel, .about-img-frame, .project-card, .skill-card, .streak-metric-card"), {
+      max: 5,
+      speed: 600,
       glare: true,
-      "max-glare": 0.15,
-      perspective: 1000
+      "max-glare": 0.06,
+      perspective: 1200,
+      scale: 1.01
     });
   }
 });
